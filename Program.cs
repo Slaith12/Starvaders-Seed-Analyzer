@@ -14,10 +14,12 @@ namespace Starvaders_Seed_Analyzer
                 Console.WriteLine("Run initialized!");
 
                 Console.WriteLine();
-                CheckArtifactRun(runState);
+                StandardConsole(runState);
             }
         }
 
+        //this was just a fun thing I wanted to check with this program
+        //the goal was to get as many artifacts as possible. It's theoretically possible to get every common artifact in a single run, but it requires good rng and money
         static void CheckArtifactRun(RunState runState)
         {
             List<ArtifactInfo> sampleArtifacts = new()
@@ -179,10 +181,10 @@ namespace Starvaders_Seed_Analyzer
                 { "goto", ChangeDay },
                 { "add", Add },
                 { "remove", Remove },
-                { "setupgrade", SetUpgrade },
-                { "clear", (_, _) => Console.Clear() },
-                { "reset", null! }
+                { "setupgrade", SetUpgrade }
             };
+            Console.WriteLine("Type 'help' to see a list of commands.");
+            Console.WriteLine("Type 'reset' to start a new run.");
             while (true)
             {
                 Console.Write(">> ");
@@ -194,7 +196,8 @@ namespace Starvaders_Seed_Analyzer
                     Console.Write("Commands: ");
                     foreach (string key in consoleCommands.Keys)
                         Console.Write(key + ", ");
-                    Console.WriteLine("help");
+                    Console.WriteLine();
+                    Console.WriteLine("For more details on how to use each command, simply type that command with no extra parameters.");
                 }
                 else if (command[0] == "reset")
                 {
