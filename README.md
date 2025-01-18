@@ -6,4 +6,4 @@ Does not support combat analysis, although some basic functionality is planned (
 Comes with a basic console interface to look through any given seed, and the program can be customized to preform more complex analysis automatically.
 
 ## How to Run
-Open the project in [Visual Studio 2022](https://visualstudio.microsoft.com/) or similar IDE to run the program.
+Open the project in [Visual Studio 2022](https://visualstudio.microsoft.com/) or any similar IDE that supports C# to run the program.
