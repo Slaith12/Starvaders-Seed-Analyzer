@@ -5,6 +5,10 @@ namespace Starvaders_Seed_Analyzer
 {
     internal class Program
     {
+        //if true, then lines with user input will be colored differently than the rest of the console
+        //somewhat buggy, but can be useful when scrolling through the console history
+        const bool USE_CONSOLE_INPUT_COLOR = false;
+
         static void Main(string[] args)
         {
             while (true)
@@ -187,8 +191,11 @@ namespace Starvaders_Seed_Analyzer
             Console.WriteLine("Type 'reset' to start a new run.");
             while (true)
             {
+                if(USE_CONSOLE_INPUT_COLOR)
+                    Console.BackgroundColor = ConsoleColor.DarkBlue;
                 Console.Write(">> ");
                 string[] command = Console.ReadLine()!.Trim().Split();
+                Console.BackgroundColor = ConsoleColor.Black;
                 if (command.Length == 0)
                     continue;
                 if (command[0] == "help")
@@ -233,13 +240,19 @@ namespace Starvaders_Seed_Analyzer
                     }
                 case "budofferings":
                     {
+                        if (runState.actNumber != 1 || runState.dayNumber != 1)
+                        {
+                            DescribeCurrentDay(runState);
+                            Console.WriteLine("Displaying results for act 1 day 1.");
+                            Console.WriteLine();
+                        }
+
                         Console.WriteLine("Bud's Factory Offerings:");
                         for (int chronoTokens = 3; chronoTokens >= 0; chronoTokens--)
                         {
                             Console.WriteLine($"At {chronoTokens} chrono tokens...");
                             int modifiedSeed = RNGHelper.GetModifiedSeed(runState.seed, 1, 1, chronoTokens);
                             Random rng = new Random(modifiedSeed);
-                            Console.WriteLine("Seed = " + modifiedSeed);
                             List<CardInstance> cards = BudFactory.GetCardDraft(runState, rng);
                             foreach (CardInstance card in cards)
                             {
@@ -251,8 +264,18 @@ namespace Starvaders_Seed_Analyzer
                     }
                 case "minofferings":
                     {
+                        int day = runState.dayNumber;
                         int tokens = runState.chronoTokens;
+                        if(GetDayType(runState.actNumber, runState.dayNumber) != DayType.Min)
+                        {
+                            DescribeCurrentDay(runState);
+                            runState.dayNumber = 4 + (runState.dayNumber == 1 ? 1 : 0);
+                            Console.WriteLine($"Displaying results for act {runState.actNumber} day {runState.dayNumber}.");
+                            Console.WriteLine();
+                        }
+
                         Console.WriteLine("Min's Shop Offerings:");
+                        Console.WriteLine("(Note that prices/contents can change depending on what/how many common artifacts you have.)");
                         for(int chronoTokens = 3; chronoTokens >= 0; chronoTokens--)
                         {
                             runState.chronoTokens = chronoTokens;
@@ -263,41 +286,33 @@ namespace Starvaders_Seed_Analyzer
                             Console.WriteLine(shop);
                         }
                         runState.chronoTokens = tokens;
+                        runState.dayNumber = day;
                         break;
                     }
                 case "offeredencounters":
                     {
-                        if (runState.actNumber == 1 && runState.dayNumber == 1)
+                        if (GetDayType(runState.actNumber, runState.dayNumber) != DayType.Encounter)
                         {
-                            Console.WriteLine("Act 1 day 1 contains Bud's Factory.");
+                            DescribeCurrentDay(runState);
+                            break;
                         }
-                        else if (runState.dayNumber == (runState.actNumber == 1 ? 5 : 4))
+
+                        Console.Write($"Available encounters for act {runState.actNumber} day {runState.dayNumber}:");
+                        int tokens = runState.chronoTokens;
+                        for (int chronoTokens = 3; chronoTokens >= 0; chronoTokens--)
                         {
-                            Console.WriteLine($"Act {runState.actNumber} day {runState.dayNumber} contains Min's Workshop.");
-                        }
-                        else if (runState.dayNumber == (runState.actNumber == 1 ? 6 : 5))
-                        {
-                            Console.WriteLine($"Act {runState.actNumber} day {runState.dayNumber} contains a boss.");
-                        }
-                        else
-                        {
-                            Console.Write($"Available encounters for act {runState.actNumber} day {runState.dayNumber}:");
-                            int tokens = runState.chronoTokens;
-                            for (int chronoTokens = 3; chronoTokens >= 0; chronoTokens--)
+                            Console.WriteLine();
+                            Console.WriteLine($"At {chronoTokens} chrono tokens...");
+                            Console.WriteLine();
+                            runState.chronoTokens = chronoTokens;
+                            var list = EncounterSelector.CreateEncounters(runState);
+                            foreach (var item in list)
                             {
+                                Console.WriteLine(item);
                                 Console.WriteLine();
-                                Console.WriteLine($"At {chronoTokens} chrono tokens...");
-                                Console.WriteLine();
-                                runState.chronoTokens = chronoTokens;
-                                var list = EncounterSelector.CreateEncounters(runState);
-                                foreach (var item in list)
-                                {
-                                    Console.WriteLine(item);
-                                    Console.WriteLine();
-                                }
                             }
-                            runState.chronoTokens = tokens;
                         }
+                        runState.chronoTokens = tokens;
                         break;
                     }
                 case "currentdeck":
@@ -315,6 +330,13 @@ namespace Starvaders_Seed_Analyzer
                     }
                 case "cardreward":
                     {
+                        if (GetDayType(runState.actNumber, runState.dayNumber) != DayType.Encounter)
+                        {
+                            DescribeCurrentDay(runState);
+                            Console.WriteLine("Go to an encounter day to get reward info.");
+                            break;
+                        }
+
                         Console.Write($"Possible card rewards for act {runState.actNumber} day {runState.dayNumber}:");
                         int tokens = runState.chronoTokens;
                         for (int chronoTokens = 3; chronoTokens >= 0; chronoTokens--)
@@ -334,6 +356,13 @@ namespace Starvaders_Seed_Analyzer
                     }
                 case "attackcardreward":
                     {
+                        if (GetDayType(runState.actNumber, runState.dayNumber) != DayType.Encounter)
+                        {
+                            DescribeCurrentDay(runState);
+                            Console.WriteLine("Go to an encounter day to get reward info.");
+                            break;
+                        }
+
                         Console.Write($"Possible attack card rewards for act {runState.actNumber} day {runState.dayNumber}:");
                         int tokens = runState.chronoTokens;
                         for (int chronoTokens = 3; chronoTokens >= 0; chronoTokens--)
@@ -353,6 +382,13 @@ namespace Starvaders_Seed_Analyzer
                     }
                 case "movetacticcardreward":
                     {
+                        if (GetDayType(runState.actNumber, runState.dayNumber) != DayType.Encounter)
+                        {
+                            DescribeCurrentDay(runState);
+                            Console.WriteLine("Go to an encounter day to get reward info.");
+                            break;
+                        }
+
                         Console.Write($"Possible move/tactic card rewards for act {runState.actNumber} day {runState.dayNumber}:");
                         int tokens = runState.chronoTokens;
                         for (int chronoTokens = 3; chronoTokens >= 0; chronoTokens--)
@@ -372,6 +408,13 @@ namespace Starvaders_Seed_Analyzer
                     }
                 case "rarecardreward":
                     {
+                        if (GetDayType(runState.actNumber, runState.dayNumber) != DayType.Encounter)
+                        {
+                            DescribeCurrentDay(runState);
+                            Console.WriteLine("Go to an encounter day to get reward info.");
+                            break;
+                        }
+
                         Console.Write($"Possible rare card rewards for act {runState.actNumber} day {runState.dayNumber}:");
                         int tokens = runState.chronoTokens;
                         for (int chronoTokens = 3; chronoTokens >= 0; chronoTokens--)
@@ -391,7 +434,14 @@ namespace Starvaders_Seed_Analyzer
                     }
                 case "componentreward":
                     {
-                        if(runState.cardDeck.Where(card => card.component == null).Count() < 3)
+                        if (GetDayType(runState.actNumber, runState.dayNumber) != DayType.Encounter)
+                        {
+                            DescribeCurrentDay(runState);
+                            Console.WriteLine("Go to an encounter day to get reward info.");
+                            break;
+                        }
+
+                        if (runState.cardDeck.Where(card => card.component == null).Count() < 3)
                         {
                             Console.WriteLine("Not enough unupgraded cards; component reward not available.");
                             Console.WriteLine();
@@ -417,7 +467,14 @@ namespace Starvaders_Seed_Analyzer
                     }
                 case "artifactreward":
                     {
-                        if(runState.artifactDeck.Count >= runState.campaign.maxArtifactCount)
+                        if (GetDayType(runState.actNumber, runState.dayNumber) != DayType.Encounter)
+                        {
+                            DescribeCurrentDay(runState);
+                            Console.WriteLine("Go to an encounter day to get reward info.");
+                            break;
+                        }
+
+                        if (runState.artifactDeck.Count >= runState.campaign.maxArtifactCount)
                         {
                             Console.WriteLine("Already at artifact limit; artifact reward not available.");
                             Console.WriteLine();
@@ -446,12 +503,27 @@ namespace Starvaders_Seed_Analyzer
                         if (runState.artifactDeck.Count >= runState.campaign.maxArtifactCount)
                         {
                             Console.WriteLine("Already at artifact limit; artifact reward not available.");
-                            Console.WriteLine("I think the game would just crash in this scenario.");
+                            Console.WriteLine("(I think the game would just crash in this scenario.)");
                             Console.WriteLine();
                             break;
                         }
+
+                        int day = runState.dayNumber;
+                        if (GetDayType(runState.actNumber, runState.dayNumber) != DayType.Boss)
+                        {
+                            DescribeCurrentDay(runState);
+                            if(runState.actNumber == 3)
+                            {
+                                Console.WriteLine("No boss rewards available for act 3.");
+                                break;
+                            }
+                            runState.dayNumber = 5 + (runState.actNumber == 1 ? 1 : 0);
+                            Console.WriteLine($"Showing results for act {runState.actNumber} day {runState.dayNumber}.");
+                            Console.WriteLine();
+                        }
+
                         Console.WriteLine($"Possible legendary artifact rewards for act {runState.actNumber} day {runState.dayNumber}:");
-                        Console.WriteLine("(Note that rewards can change if you pick up other artifacts beforehand)");
+                        Console.WriteLine("(Note that rewards can change based on what legendary artifacts are already obtained.)");
                         int tokens = runState.chronoTokens;
                         for (int chronoTokens = 3; chronoTokens >= 0; chronoTokens--)
                         {
@@ -466,6 +538,7 @@ namespace Starvaders_Seed_Analyzer
                             }
                         }
                         runState.chronoTokens = tokens;
+                        runState.dayNumber = day;
                         break;
                     }
                 default:
@@ -487,11 +560,41 @@ namespace Starvaders_Seed_Analyzer
                 runState.actNumber = actNum;
                 runState.dayNumber = dayNum;
                 Console.WriteLine($"Moved to act {actNum} day {dayNum}.");
+                DescribeCurrentDay(runState);
             }
             else
             {
                 Console.WriteLine("Invalid act/day.");
             }
+        }
+
+        static void DescribeCurrentDay(RunState runState)
+        {
+            Console.WriteLine($"Act {runState.actNumber} day {runState.dayNumber} contains " + GetDayType(runState.actNumber, runState.dayNumber) switch
+            {
+                DayType.Encounter => "an encounter.",
+                DayType.Min => "Min's Workshop.",
+                DayType.Bud => "Bud's Factory.",
+                DayType.Boss => "a boss encounter.",
+                _ => "[[INVALID DATA]]"
+            });
+        }
+
+        static DayType GetDayType(int actNumber, int dayNumber)
+        {
+            if (actNumber == 1)
+                dayNumber--;
+
+            if (dayNumber == 0)
+                return DayType.Bud;
+            else if (dayNumber == 4)
+                return DayType.Min;
+            else if (dayNumber == 5)
+                return DayType.Boss;
+            else if (dayNumber < 0 || dayNumber > 5)
+                return DayType.Invalid;
+            else
+                return DayType.Encounter;
         }
 
         static void Add(RunState runState, string[] command)
