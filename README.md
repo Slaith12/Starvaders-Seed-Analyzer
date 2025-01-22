@@ -6,4 +6,6 @@ Does not support combat analysis, although some basic functionality is planned (
 Comes with a basic console interface to look through any given seed, and the program can be customized to preform more complex analysis automatically.
 
 ## How to Run
-Open the project in [Visual Studio 2022](https://visualstudio.microsoft.com/) or any similar IDE that supports C# to run the program.
+Download the .zip file from the [latest release](https://github.com/Slaith12/Starvaders-Seed-Analyzer/releases), unzip, and run the .exe file within it. (This might not work on non-Windows computers)
+
+Alternatively, you can download the repository and open the project in [Visual Studio 2022](https://visualstudio.microsoft.com/) or any similar IDE that supports C#.
