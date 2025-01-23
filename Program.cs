@@ -224,7 +224,7 @@ namespace Starvaders_Seed_Analyzer
         {
             if(command.Length <= 1)
             {
-                Console.WriteLine("Available lists: ObtainableCards, BudOfferings, MinOfferings, OfferedEncounters, CurrentDeck, CardReward, AttackCardReward, MoveTacticCardReward, RareCardReward, ComponentReward, ArtifactReward, BossReward");
+                Console.WriteLine("Available lists: ObtainableCards, BudOfferings, MinOfferings, OfferedEncounters, CurrentDeck, CardReward, AttackCardReward, TacMoveCardReward, RareCardReward, ComponentReward, ArtifactReward, BossReward");
                 return;
             }
             switch (command[1].ToLower())
@@ -238,6 +238,8 @@ namespace Starvaders_Seed_Analyzer
                             Console.WriteLine(card.name);
                         break;
                     }
+                case "budshop":
+                case "budoffering":
                 case "budofferings":
                     {
                         if (runState.actNumber != 1 || runState.dayNumber != 1)
@@ -262,6 +264,8 @@ namespace Starvaders_Seed_Analyzer
                         }
                         break;
                     }
+                case "minshop":
+                case "minoffering":
                 case "minofferings":
                     {
                         int day = runState.dayNumber;
@@ -289,6 +293,7 @@ namespace Starvaders_Seed_Analyzer
                         runState.dayNumber = day;
                         break;
                     }
+                case "offeredencounter":
                 case "offeredencounters":
                     {
                         if (GetDayType(runState.actNumber, runState.dayNumber) != DayType.Encounter)
@@ -329,6 +334,7 @@ namespace Starvaders_Seed_Analyzer
                         break;
                     }
                 case "cardreward":
+                case "cardrewards":
                     {
                         if (GetDayType(runState.actNumber, runState.dayNumber) != DayType.Encounter)
                         {
@@ -354,7 +360,10 @@ namespace Starvaders_Seed_Analyzer
                         runState.chronoTokens = tokens;
                         break;
                     }
+                case "attackreward":
+                case "attackrewards":
                 case "attackcardreward":
+                case "attackcardrewards":
                     {
                         if (GetDayType(runState.actNumber, runState.dayNumber) != DayType.Encounter)
                         {
@@ -380,7 +389,18 @@ namespace Starvaders_Seed_Analyzer
                         runState.chronoTokens = tokens;
                         break;
                     }
+                case "tacmovereward":
+                case "tacticmovereward":
+                case "movetacticreward":
+                case "tacmovrewards":
+                case "tacticmoverewards":
+                case "movetacticrewards":
+                case "tacmovecardreward":
+                case "tacticmovecardreward":
                 case "movetacticcardreward":
+                case "tacmovecardrewards":
+                case "tacticmovecardrewards":
+                case "movetacticcardrewards":
                     {
                         if (GetDayType(runState.actNumber, runState.dayNumber) != DayType.Encounter)
                         {
@@ -389,7 +409,7 @@ namespace Starvaders_Seed_Analyzer
                             break;
                         }
 
-                        Console.Write($"Possible move/tactic card rewards for act {runState.actNumber} day {runState.dayNumber}:");
+                        Console.Write($"Possible tactic/move card rewards for act {runState.actNumber} day {runState.dayNumber}:");
                         int tokens = runState.chronoTokens;
                         for (int chronoTokens = 3; chronoTokens >= 0; chronoTokens--)
                         {
@@ -397,7 +417,7 @@ namespace Starvaders_Seed_Analyzer
                             Console.WriteLine($"At {chronoTokens} chrono tokens...");
                             Console.WriteLine();
                             runState.chronoTokens = chronoTokens;
-                            var list = RewardController.GetMoveTacticCardReward(runState);
+                            var list = RewardController.GetTacticMoveCardReward(runState);
                             foreach (var item in list)
                             {
                                 Console.WriteLine(item);
@@ -407,6 +427,7 @@ namespace Starvaders_Seed_Analyzer
                         break;
                     }
                 case "rarecardreward":
+                case "rarecardrewards":
                     {
                         if (GetDayType(runState.actNumber, runState.dayNumber) != DayType.Encounter)
                         {
@@ -432,7 +453,10 @@ namespace Starvaders_Seed_Analyzer
                         runState.chronoTokens = tokens;
                         break;
                     }
+                case "upgradereward":
+                case "upgraderewards":
                 case "componentreward":
+                case "componentrewards":
                     {
                         if (GetDayType(runState.actNumber, runState.dayNumber) != DayType.Encounter)
                         {
@@ -466,6 +490,7 @@ namespace Starvaders_Seed_Analyzer
                         break;
                     }
                 case "artifactreward":
+                case "artifactrewards":
                     {
                         if (GetDayType(runState.actNumber, runState.dayNumber) != DayType.Encounter)
                         {
@@ -499,6 +524,7 @@ namespace Starvaders_Seed_Analyzer
                         break;
                     }
                 case "bossreward":
+                case "bossrewards":
                     {
                         if (runState.artifactDeck.Count >= runState.campaign.maxArtifactCount)
                         {

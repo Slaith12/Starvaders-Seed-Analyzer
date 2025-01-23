@@ -13,7 +13,7 @@ namespace Starvaders_Seed_Analyzer
             return cards;
         }
 
-        public static List<CardInstance> GetMoveTacticCardReward(RunState runState)
+        public static List<CardInstance> GetTacticMoveCardReward(RunState runState)
         {
             Random rng = new Random(runState.modifiedSeed);
             List<CardInstance> cards = RNGHelper.GetRandomWeightedCards(runState, 2, rng, runState.defaultRarityRatio, 0.05f, CardTraitFlag.Tactic);
