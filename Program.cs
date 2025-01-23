@@ -269,7 +269,7 @@ namespace Starvaders_Seed_Analyzer
                         if(GetDayType(runState.actNumber, runState.dayNumber) != DayType.Min)
                         {
                             DescribeCurrentDay(runState);
-                            runState.dayNumber = 4 + (runState.dayNumber == 1 ? 1 : 0);
+                            runState.dayNumber = 4 + (runState.actNumber == 1 ? 1 : 0);
                             Console.WriteLine($"Displaying results for act {runState.actNumber} day {runState.dayNumber}.");
                             Console.WriteLine();
                         }
